@@ -249,6 +249,12 @@ function init(arr) {
   });
 }
 
+if (lang) {
+  init(enArr);
+} else if (lang == false) {
+  init(rusArr);
+}
+
 let textArea = document.createElement("textarea");
 textArea.cols = "80";
 textArea.rows = "15";
