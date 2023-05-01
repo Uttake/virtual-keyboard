@@ -101,6 +101,11 @@ let shift = false;
 const wrapper = document.createElement("div");
 wrapper.classList.add("wrapper");
 document.body.prepend(wrapper);
+const textLang = document.createElement("div");
+textLang.innerHTML =
+  "<p class = 'para'>Клавиатура создана в операционной системе Windows</p> <p>Для переключения языка используется комбинация: левые ctrl + alt</p>";
+
+document.body.append(textLang);
 
 function init(arr) {
   document.querySelectorAll(".row").forEach((item) => {
@@ -117,6 +122,12 @@ function init(arr) {
         btn.textContent =
           typeof el == "string" && el.length == 1 ? el.toUpperCase() : el;
       }
+
+      if (shift) {
+        btn.textContent =
+          typeof el == "string" && el.length == 1 ? el.toUpperCase() : el;
+      }
+
       btn.classList.add(`key`);
       if (typeof el == "number") {
         // btn.value = `Digit${el}`;
@@ -238,15 +249,9 @@ function init(arr) {
   });
 }
 
-if (lang) {
-  init(enArr);
-} else {
-  init(rusArr);
-}
-
 let textArea = document.createElement("textarea");
 textArea.cols = "80";
-textArea.rows = "7";
+textArea.rows = "15";
 textArea.classList.add("text");
 wrapper.prepend(textArea);
 
@@ -271,12 +276,12 @@ function shiftCase() {
 function drawClick() {
   wrapper.addEventListener("click", (e) => {
     e.preventDefault();
-
     let target = e.target;
     if (
       target.classList == "wrapper" ||
       target.classList == "row" ||
-      target.classList == "text"
+      target.classList == "text" ||
+      e.target.textContent == "win"
     ) {
       return;
     }
@@ -317,7 +322,14 @@ function drawClick() {
         break;
       case "ShiftLeft":
       case "ShiftRight":
-        shiftCase();
+        text.textContent += "";
+        break;
+      case "ControlLeft":
+      case "ControlRight":
+      case "AltLeft":
+      case "AltRight":
+        text.focus();
+        text.textContent += "";
         break;
       default:
         if (caps) {
@@ -332,7 +344,7 @@ function drawClick() {
 drawClick();
 
 function changeLang(e) {
-  if (e.altKey && e.shiftKey) {
+  if (e.altKey && e.ctrlKey) {
     lang = !lang;
     if (lang) {
       init(enArr);
@@ -350,6 +362,14 @@ document.addEventListener("keydown", (e) => {
     capsLock();
   }
   changeLang(e);
+
+  if (e.shiftKey) {
+    shiftBtn();
+    document.addEventListener("keyup", (e) => {
+      shiftBtn();
+    });
+  }
+
   let keys = document.querySelectorAll(".key");
   keys.forEach((el) => {
     el.classList.remove("active");
@@ -462,6 +482,15 @@ function capsLock() {
   }
 }
 
+function shiftBtn() {
+  shift = !shift;
+  if (lang) {
+    init(enArr);
+  } else {
+    init(rusArr);
+  }
+}
+
 function tab() {
   let currentPos = getCaret(text);
   text.value =
@@ -477,3 +506,19 @@ function spaceBar() {
   let newPos = currentPos + 1;
   resetCursor(text, newPos);
 }
+
+function setLocalStorage() {
+  localStorage.setItem("lang", lang);
+}
+
+window.addEventListener("beforeunload", setLocalStorage);
+
+window.addEventListener("load", () => {
+  lang = JSON.parse(localStorage.getItem("lang"));
+  console.log(lang);
+  if (lang) {
+    init(enArr);
+  } else if (lang == false) {
+    init(rusArr);
+  }
+});
