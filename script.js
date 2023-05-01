@@ -1,6 +1,3 @@
-// const str =
-//   "`,1,2,3,4,5,6,7,8,9,0,-,=,Backspace,Tab,q,w,e,r,t,y,u,i,o,p,[,],\\,Capslock,a,s,d,f,g,h,j,k,l,;,',leftshift,z,x,c,v,b,n,m,,,.,/,rigthshift,leftctrl,win,leftalt,space,rigthalt,rigthctrl";
-
 const enArr = [
   ["`", 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, "-", "=", "Backspace"],
   [
@@ -97,14 +94,18 @@ const rusArr = [
   ],
 ];
 
-let enType = true;
-let ruType = false;
+let lang = true;
+let caps = false;
+let shift = false;
 
 const wrapper = document.createElement("div");
 wrapper.classList.add("wrapper");
 document.body.prepend(wrapper);
 
 function init(arr) {
+  document.querySelectorAll(".row").forEach((item) => {
+    item.remove();
+  });
   arr.forEach((el) => {
     let rows = document.createElement("div");
     rows.classList.add("row");
@@ -112,13 +113,20 @@ function init(arr) {
     el.forEach((el) => {
       let btn = document.createElement("button");
       btn.textContent = el;
+      if (caps) {
+        btn.textContent =
+          typeof el == "string" && el.length == 1 ? el.toUpperCase() : el;
+      }
       btn.classList.add(`key`);
       if (typeof el == "number") {
-        btn.value = `Digit${el}`;
+        // btn.value = `Digit${el}`;
+        btn.value = el;
       }
       if (typeof el == "string") {
-        btn.value = `Key${el.toUpperCase()}`;
+        // btn.value = `Key${el.toUpperCase()}`;
+        btn.value = el;
       }
+
       switch (el) {
         case "Tab":
           btn.classList.add("key", "tab");
@@ -204,13 +212,37 @@ function init(arr) {
           break;
         case "del":
           btn.value = "Delete";
+          break;
+        case "∧":
+          btn.value = "ArrowUp";
+          break;
+        case "<":
+          btn.value = "ArrowLeft";
+          break;
+        case "∨":
+          btn.value = "ArrowDown";
+          break;
+        case ">":
+          btn.value = "ArrowRight";
+          break;
+        case ";":
+          btn.value = "Semicolon";
+          break;
+        case "'":
+          btn.value = "Quote";
+          break;
       }
+
       rows.append(btn);
     });
   });
 }
 
-init(enArr);
+if (lang) {
+  init(enArr);
+} else {
+  init(rusArr);
+}
 
 let textArea = document.createElement("textarea");
 textArea.cols = "80";
@@ -222,75 +254,122 @@ const container = document.querySelector(".wrapper");
 const text = document.querySelector(".text");
 const keys = document.querySelectorAll(".key");
 
-// let shiftPress = false;
-// function shiftDown() {
-//   let shiftPress = !shiftPress;
-//   if (shiftPress) {
-//     keys.forEach((el) => {
-//       el.textContent.toUpperCase();
-//     });
-//   }
-// }
+function shiftCase() {
+  let btn = document.querySelectorAll(".leftshift, .rigthshift");
+  btn.forEach((el) => {
+    el.addEventListener("click", () => {
+      capsLock();
+      console.log("click");
+    });
+    el.removeEventListener("click", () => {
+      capsLock();
+      console.log("stop");
+    });
+  });
+}
 
-wrapper.addEventListener("click", (e) => {
-  e.preventDefault();
-  drawClick(e.target);
-});
+function drawClick() {
+  wrapper.addEventListener("click", (e) => {
+    e.preventDefault();
 
-document.addEventListener("keydown", (e) => {
-  text.focus();
-  keys.forEach((el) => {
-    el.classList.remove("active");
-    if (e.code == el.value) {
-      el.classList.add("active");
+    let target = e.target;
+    if (
+      target.classList == "wrapper" ||
+      target.classList == "row" ||
+      target.classList == "text"
+    ) {
+      return;
+    }
+
+    switch (target.value) {
+      case "Backspace":
+        Backspace();
+        break;
+      case "Enter":
+        text.value = text.value += "\n";
+        text.focus();
+        break;
+      case "Space":
+        spaceBar();
+        text.focus();
+        break;
+      case "Tab":
+        tab();
+        text.focus();
+        break;
+      case "Delete":
+        del();
+        break;
+      case "ArrowLeft":
+        leftPos();
+        break;
+      case "ArrowRight":
+        rightPos();
+        break;
+      case "ArrowUp":
+        upPos();
+        break;
+      case "ArrowDown":
+        downPos();
+        break;
+      case "CapsLock":
+        capsLock();
+        break;
+      case "ShiftLeft":
+      case "ShiftRight":
+        shiftCase();
+        break;
+      default:
+        if (caps) {
+          text.value += target.textContent.toUpperCase();
+        } else {
+          text.value += target.textContent.toLowerCase();
+        }
     }
   });
-});
+}
 
-function drawClick(target) {
-  keys.forEach((el) => {
-    el.classList.remove("active");
-  });
-  if (
-    target.classList == "wrapper" ||
-    target.classList == "row" ||
-    target.classList == "text"
-  ) {
-    return;
-  }
-  switch (target.value) {
-    case "Backspace":
-      Backspace();
-      target.classList.add("active");
-      break;
-    case "Enter":
-      text.value = text.value += "\n";
-      target.classList.add("active");
-      break;
-    case "Space":
-      text.value += " ";
-      target.classList.add("active");
-      break;
-    case "Tab":
-      text.value += "  ";
-      target.classList.add("active");
-      break;
-    case "Delete":
-      del();
-      target.classList.add("active");
-      break;
+drawClick();
 
-    default:
-      text.value += target.textContent;
-      target.classList.add("active");
+function changeLang(e) {
+  if (e.altKey && e.shiftKey) {
+    lang = !lang;
+    if (lang) {
+      init(enArr);
+      lang = true;
+    } else {
+      init(rusArr);
+      lang = false;
+    }
   }
 }
 
-function capsLockToggle() {}
-
 document.addEventListener("keydown", (e) => {
-  console.log(e.code);
+  text.focus();
+  if (e.code === "CapsLock") {
+    capsLock();
+  }
+  changeLang(e);
+  let keys = document.querySelectorAll(".key");
+  keys.forEach((el) => {
+    el.classList.remove("active");
+    if (e.key == el.textContent) {
+      el.classList.add("active");
+    } else if (e.code == el.value) {
+      el.classList.add("active");
+    } else {
+      el.classList.remove("active");
+    }
+
+    setTimeout(() => {
+      el.classList.remove("active");
+    }, 1000);
+  });
 });
+
+// document.addEventListener("keydown", (e) => {
+//   console.log(e);
+// });
 
 function getCaret(el) {
   if (el.selectionStart) {
@@ -305,6 +384,8 @@ function getCaret(el) {
 
     let re = el.createTextRange(),
       rc = re.duplicate();
+    console.log(re);
+    console.log(rc);
     re.moveToBookmark(r.getBookmark());
     rc.setEndPoint("EndToStart", re);
 
@@ -331,8 +412,6 @@ function Backspace() {
   let backSpace =
     newText.substr(0, currentPos - 1) +
     newText.substr(currentPos, newText.length);
-  console.log(newText.substr(0, currentPos - 1));
-  console.log(newText.substr(currentPos, newText.length));
   text.value = backSpace;
 
   resetCursor(text, currentPos - 1);
@@ -342,8 +421,59 @@ function del() {
   let currentPos = getCaret(text);
   let newText = text.value;
   let deleted =
-    newText.substr(0, currentPos - 1) +
-    newText.substr(currentPos, newText.length);
+    newText.substr(0, currentPos) +
+    newText.substr(currentPos + 1, newText.length);
   text.value = deleted;
   resetCursor(text, currentPos);
+}
+
+function leftPos() {
+  let currentPos = getCaret(text);
+  let newPos = currentPos - 1;
+  if (currentPos == 1) {
+    resetCursor(text, 0);
+  }
+  resetCursor(text, newPos);
+}
+
+function rightPos() {
+  let currentPos = getCaret(text);
+  let newPos = currentPos + 1;
+  resetCursor(text, newPos);
+}
+
+function upPos() {
+  let currentPos = getCaret(text);
+  currentPos = 0;
+  resetCursor(text, currentPos);
+}
+
+function downPos() {
+  let newPos = text.value.length;
+  resetCursor(text, newPos);
+}
+
+function capsLock() {
+  caps = !caps;
+  if (lang) {
+    init(enArr);
+  } else {
+    init(rusArr);
+  }
+}
+
+function tab() {
+  let currentPos = getCaret(text);
+  text.value =
+    text.value.substr(0, currentPos) + "  " + text.value.substr(currentPos);
+  let newPos = currentPos + 2;
+  resetCursor(text, newPos);
+}
+
+function spaceBar() {
+  let currentPos = getCaret(text);
+  text.value =
+    text.value.substr(0, currentPos) + " " + text.value.substr(currentPos);
+  let newPos = currentPos + 1;
+  resetCursor(text, newPos);
 }

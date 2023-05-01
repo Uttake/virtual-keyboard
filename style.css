@@ -394,7 +394,7 @@ img{
     display: flex;
     flex-direction: column;
     gap: 5px;
-    padding: 0 10px 10px 10px;
+    padding: 20px 10px 10px 10px;
 }
 .row {
     display: flex;
@@ -405,6 +405,7 @@ img{
     display: flex;
     justify-content: center;
     align-items: center;
+    padding-top: 100px;
 }
 
 .key {
@@ -412,9 +413,11 @@ img{
     color:#cfd8e0;
     border: 1px black;
     box-shadow: 0px 0px 16px 0px rgba(34, 60, 80, 0.21);
-    padding: 15px 20px;
+    /* padding: 15px 20px; */
     border-radius: 5px;
     transition: all 0.4s linear;
+    width: 40px;
+    height: 40px;
 }
 
 .active {
@@ -424,22 +427,32 @@ img{
 .tab {
     width: 70px;
 }
+.back {
+    width: 115px;
+}
+.capslock {
+    width: 95px;
+}
 
 .enter {
-    width: 135px;
+    width: 104px;
 }
 
 .leftshift {
-    width: 175px;
+    width: 140px;
 }
 
 .rigthshift {
-    width: 50px;
+    width: 60px;
     padding: 10px;
 }
 
 .space {
-    width: 322px;
+    width: 320px;
+}
+
+.key:hover {
+    background: #6faad4d5
 }
 
 
